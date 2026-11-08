@@ -1,0 +1,373 @@
+\documentclass[11pt]{amsart}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,mathtools,enumitem,booktabs}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\numberwithin{equation}{section}
+
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\hmax}{h_{\max}}
+\newcommand{\hmin}{h_{\min}}
+
+\hypersetup{pdftitle={Heavy-ball momentum and batch size in streaming least squares},pdfauthor={Yitzchak Shmalo}}
+
+\title[Momentum and batch size]{Heavy-ball momentum and batch size in streaming least squares: matching bounds on the tuned speedup over SGD}
+\author{Yitzchak Shmalo}
+\address{Einstein Institute of Mathematics, The Hebrew University of Jerusalem, Jerusalem, Israel}
+\email{yitzchak.shmalo@gmail.com}
+\date{8 November 2026}
+\subjclass[2020]{90C15, 62L20, 68T05, 60J20}
+\keywords{stochastic gradient descent, heavy-ball momentum, mini-batch, least squares, mean-square stability, renewal equation}
+
+\begin{document}
+\begin{abstract}
+We consider realizable streaming least squares with Gaussian covariates $x\sim N(0,H)$ and mini-batches of size $B$, and compare stochastic heavy-ball momentum with plain stochastic gradient descent, each with its step size and momentum chosen to minimise the spectral radius $\rho$ of the exact second-moment recursion. Writing $\kappa=\hmax/\hmin$ for the condition number of $H$, we prove that the ratio of the optimal spectral gaps satisfies
+\[
+\max\Bigl(1,\tfrac1{16}\,m\Bigr)\;\le\;\frac{1-\rho_{\mathrm{HB}}^*}{1-\rho_{\mathrm{SGD}}^*}\;\le\;\frac{128}{3}\,m,
+\qquad m=\min\Bigl(\max\Bigl(1,\frac{B\hmax}{\tr H}\Bigr),\sqrt\kappa\Bigr).
+\]
+Momentum therefore gains at most a constant factor while $B\lesssim\tr H/\hmax$, gains a factor proportional to $B$ in the intermediate range, and gains the full factor $\sqrt\kappa$ once $B\gtrsim\sqrt\kappa\,\tr H/\hmax$. The upper bound $1-\rho_{\mathrm{HB}}^*\le8\min(B\hmin/\tr H,1/\sqrt\kappa)$ is due to Morwani, Meterez, Nair and Kakade; the new ingredient is an explicit choice of parameters, critical damping at the smallest eigenvalue, that attains it up to a constant. Both directions rest on an exact renewal equation for the diagonal second moments, which also gives a closed-form necessary and sufficient condition for mean-square stability.
+\end{abstract}
+\maketitle
+
+\section{Introduction}\label{sec:intro}
+
+Whether momentum accelerates stochastic gradient descent has a well-known negative answer in the small-batch regime. Kidambi, Netrapalli, Jain and Kakade \cite{KNJK18} exhibited simple least-squares instances on which stochastic heavy ball and Nesterov's method cannot outperform SGD at any setting of their parameters, and attributed their practical gains to mini-batching; Jain, Kakade, Kidambi, Netrapalli and Sidford \cite{JKKNS18} gave a different accelerated scheme that does improve on SGD. In the proportional high-dimensional limit, Paquette and Paquette \cite{PP21} showed that small-batch momentum gives no acceleration, and Lee, Cheng, Paquette and Paquette \cite{LCPP22} showed that once the batch exceeds an implicit conditioning ratio heavy ball converges at the accelerated rate $O(1/\sqrt\kappa)$. Bollapragada, Chen and Ward \cite{BCW25} proved accelerated linear convergence of mini-batch heavy ball once the batch is large enough, and Dang, Babanezhad and Vaswani \cite{DBV25} showed that a $\kappa$-dependent batch threshold is necessary.
+
+Recently Morwani, Meterez, Nair and Kakade \cite{MMNK26} studied the same streaming model as the present paper and proved that the best spectral radius $s^*(H,B)$ of the heavy-ball second-moment operator satisfies $s^*(H,B)\ge 1-8\min\{B\hmin/\tr H,\sqrt{\hmin/\hmax}\}$. This identifies the critical batch $B^{\mathrm{crit}}_{\mathrm{HB}}=\sqrt\kappa\,\tr H/\hmax$, beyond which acceleration is possible in principle. They left the matching upper bound, that is, parameters attaining such a rate, to future work.
+
+This paper supplies that bound and turns the comparison with SGD into a two-sided estimate. The model is realizable least squares $y=\langle w^*,x\rangle$ with $x\sim N(0,H)$, $H\succ0$, a fresh batch $x_{t,1},\dots,x_{t,B}$ at every step, and the heavy-ball recursion
+\begin{equation}\label{eq:hb}
+w_{t+1}=w_t-\eta\,\widehat H_t(w_t-w^*)+\beta(w_t-w_{t-1}),\qquad \widehat H_t=\frac1B\sum_{i=1}^B x_{t,i}x_{t,i}^{\top},
+\end{equation}
+with $\eta>0$ and $\beta\in[0,1)$; $\beta=0$ is SGD. Let $\rho(\eta,\beta,B)$ be the spectral radius of the linear map that advances the second moments (Section~\ref{sec:setup}), so that $\E\|w_t-w^*\|^2$ decays like $\rho^t$, and put
+\[
+\rho_{\mathrm{HB}}^*=\inf_{\eta>0,\;0\le\beta<1}\rho(\eta,\beta,B),\qquad \rho_{\mathrm{SGD}}^*=\inf_{\eta>0}\rho(\eta,0,B).
+\]
+Let $h_1\ge\dots\ge h_d>0$ be the eigenvalues of $H$, $\hmax=h_1$, $\hmin=h_d$ and $\kappa=\hmax/\hmin$.
+
+\begin{theorem}\label{thm:main}
+Let $m=\min\bigl(\max(1,B\hmax/\tr H),\sqrt\kappa\bigr)$. Then
+\[
+\max\Bigl(1,\frac{m}{16}\Bigr)\le\frac{1-\rho_{\mathrm{HB}}^*}{1-\rho_{\mathrm{SGD}}^*}\le\frac{128}{3}\,m .
+\]
+More precisely, $1-\rho_{\mathrm{HB}}^*$ lies between $\frac14\min(1,2/\sqrt\kappa,B\hmin/\tr H)$ and $\min(8B\hmin/\tr H,4/\sqrt\kappa)$, and $1-\rho_{\mathrm{SGD}}^*$ lies between $\frac34\hmin\min(B/(4\tr H),1/(2\hmax))$ and $4\hmin\min(B/\tr H,1/\hmax)$.
+\end{theorem}
+
+The three regimes are visible in the formula. For $B\le\tr H/\hmax$ the speedup is bounded by an absolute constant, which is the instance-level form of the phenomenon of \cite{KNJK18}: in that range the noise, not the conditioning, limits both methods. Between $\tr H/\hmax$ and $\sqrt\kappa\,\tr H/\hmax$ the speedup grows linearly in $B$, and beyond the critical batch of \cite{MMNK26} it saturates at order $\sqrt\kappa$, the deterministic acceleration of Polyak's method.
+
+The lower bound on $1-\rho^*_{\mathrm{HB}}$ comes from one explicit choice (Lemma~\ref{lem:tuning}):
+\[
+\delta=\min\Bigl(1,\frac{2}{\sqrt\kappa},\frac{B\hmin}{\tr H}\Bigr),\qquad \sqrt\beta=1-\frac\delta2,\qquad \eta=\frac{\delta^2}{4\hmin},
+\]
+which places every mode of the mean recursion at or beyond critical damping, with all characteristic roots of modulus $\sqrt\beta$, while keeping the effective step $\eta/(1-\beta)\approx\delta/(4\hmin)$ below $B/(4\tr H)$, the size at which the gradient noise would accumulate. The proof that the noise does not undo the deterministic contraction uses the structure of Gaussian fourth moments. For Gaussian $x$ the diagonal of the second moment of $w_t-w^*$ in the eigenbasis of $H$ evolves on its own, and it satisfies a renewal equation whose kernel is a nonnegative diagonal-plus-rank-one matrix built from the squared impulse responses of the deterministic recursion (Section~\ref{sec:renewal}). Weighting that equation by $\mu^{-t}$ reduces a bound $\rho\le\mu$ to a scalar inequality for each mode, which for the choice above is a polynomial inequality in two variables that we check by hand.
+
+The same renewal equation gives the exact mean-square stability region (Proposition~\ref{prop:stability}): the recursion is stable if and only if
+\[
+D_j:=(1-\beta)\bigl(2(1+\beta)-\eta h_j\bigr)-(1+\beta)\frac{\eta h_j}{B}>0\ \ \text{for all } j,
+\qquad\text{and}\qquad
+\frac\eta B\sum_{j=1}^d\frac{(1+\beta)h_j}{D_j}<1 .
+\]
+For $\beta=0$ this is the familiar condition $\frac\eta B\sum_j h_j/(2-\eta h_j(1+1/B))<1$ for SGD.
+
+The paper is organised as follows. Section~\ref{sec:setup} sets up the second-moment recursion, Section~\ref{sec:renewal} derives the renewal equation and the stability criterion, Section~\ref{sec:limits} proves the two upper bounds on the spectral gaps, Section~\ref{sec:tuning} proves the lower bounds, and Section~\ref{sec:proof} assembles Theorem~\ref{thm:main}. Section~\ref{sec:numerics} reports numerical checks, and Section~\ref{sec:remarks} discusses the scope of the result.
+
+\section{The second-moment recursion}\label{sec:setup}
+
+If $U$ is orthogonal with $U^\top HU$ diagonal, then $U^\top x\sim N(0,U^\top HU)$ and the recursion \eqref{eq:hb} is equivariant under $w\mapsto U^\top w$, so we may and do assume $H=\operatorname{diag}(h_1,\dots,h_d)$. Write $e_t=w_t-w^*$. Then \eqref{eq:hb} reads
+\begin{equation}\label{eq:err}
+e_{t+1}=(1+\beta-\eta H)e_t-\beta e_{t-1}+\xi_t,\qquad \xi_t=-\eta(\widehat H_t-H)e_t .
+\end{equation}
+The initial pair $(e_0,e_{-1})$ may be random, independent of the samples, with finite second moments. Let $\mathcal F_t$ be the $\sigma$-field generated by $(e_0,e_{-1})$ and the batches before time $t$. Then $e_t,e_{t-1}$ are $\mathcal F_t$-measurable and $\E[\xi_t\mid\mathcal F_t]=0$.
+
+For a single $x\sim N(0,H)$ and a symmetric matrix $A$, Isserlis' theorem gives $\E[xx^\top Axx^\top]=2HAH+\tr(AH)H$, so for a batch of size $B$
+\[
+\E\bigl[\widehat H A\widehat H\bigr]=HAH+\frac1B\bigl(HAH+\tr(AH)H\bigr).
+\]
+Hence the conditional covariance of $\xi_t$ is $\frac{\eta^2}{B}\bigl(He_te_t^\top H+(e_t^\top He_t)H\bigr)$, and its $j$-th diagonal entry is
+\begin{equation}\label{eq:noisevar}
+\E[\xi_{t,j}^2\mid\mathcal F_t]=\frac{\eta^2}{B}\Bigl(h_j^2e_{t,j}^2+h_j\sum_{l=1}^dh_le_{t,l}^2\Bigr).
+\end{equation}
+It depends on $e_t$ only through the squares of its coordinates. Put $k_j=1+\beta-\eta h_j$ and
+\[
+a_j(t)=\E e_{t,j}^2,\qquad b_j(t)=\E e_{t,j}e_{t-1,j},\qquad c_j(t)=\E e_{t-1,j}^2 .
+\]
+Taking expectations in \eqref{eq:err} and using $\E[\xi_t\mid\mathcal F_t]=0$,
+\begin{align}
+a_j(t+1)&=k_j^2a_j(t)-2\beta k_jb_j(t)+\beta^2c_j(t)+\frac{\eta^2}{B}\Bigl(h_j^2a_j(t)+h_j\sum_lh_la_l(t)\Bigr),\notag\\
+b_j(t+1)&=k_ja_j(t)-\beta b_j(t),\qquad c_j(t+1)=a_j(t).\label{eq:map}
+\end{align}
+This is a linear recursion $v(t+1)=Tv(t)$ on $v=(a_j,b_j,c_j)_{j\le d}\in\R^{3d}$, with $T=T(\eta,\beta,B)$ independent of the start.
+
+\begin{definition}
+The mean-square rate is $\rho(\eta,\beta,B)$, the spectral radius of $T$.
+\end{definition}
+
+\begin{remark}\label{rem:rate}
+For every start, $\limsup_t(\E\|e_t\|^2)^{1/t}\le\rho$, and some start attains equality. Indeed, the vectors $v(0)$ that arise from random starts span $\R^{3d}$: for each $j$ the triple $(a_j,b_j,c_j)$ of a random pair $(e_{0,j},e_{-1,j})$ ranges over the cone of $2\times2$ positive semidefinite matrices, which spans $\R^3$, and the coordinates may be taken independent. Since $|b_j(t)|\le\sqrt{a_j(t)a_j(t-1)}$ and $c_j(t)=a_j(t-1)$, the growth of $\|T^tv(0)\|$ is the growth of $\sum_ja_j(t)=\E\|e_t\|^2$. If $\E\|e_t\|^2=O(\mu^t)$ for every realisable start, then $\|T^tv\|=O(\mu^t)$ on a spanning set, so $\rho\le\mu$. We use this form below.
+\end{remark}
+
+Two elementary facts will be used repeatedly. First, $\E e_t$ follows the noiseless recursion $\bar e_{t+1}=(1+\beta-\eta H)\bar e_t-\beta\bar e_{t-1}$, mode by mode with characteristic polynomial
+\[
+\pi_j(r)=r^2-k_jr+\beta,\qquad r_{j,1}r_{j,2}=\beta,\qquad (1-r_{j,1})(1-r_{j,2})=\pi_j(1)=\eta h_j .
+\]
+Let $q=\max_{j,i}|r_{j,i}|$. Starting from a deterministic pair excites every root, and $a_j(t)\ge(\E e_{t,j})^2$, so
+\begin{equation}\label{eq:jensen}
+\rho\ge q^2 .
+\end{equation}
+Second, the noiseless mode $j$ is stable, $q_j:=\max_i|r_{j,i}|<1$, exactly when $0<\eta h_j<2(1+\beta)$ (for $0\le\beta<1$).
+
+\section{A renewal equation and the stability region}\label{sec:renewal}
+
+Let $g_j$ be the impulse response of mode $j$: $g_j(0)=1$, $g_j(1)=k_j$, $g_j(n)=k_jg_j(n-1)-\beta g_j(n-2)$. Solving \eqref{eq:err} coordinate by coordinate,
+\[
+e_{t,j}=\bar e_{t,j}+\sum_{s=0}^{t-1}g_j(t-1-s)\,\xi_{s,j},
+\]
+where $\bar e_{t,j}$ is the noiseless solution from the same start and is $\mathcal F_0$-measurable. The terms are orthogonal in $L^2$: for $s<s'$, $\E[\xi_{s,j}\xi_{s',j}]=\E[\xi_{s,j}\E[\xi_{s',j}\mid\mathcal F_{s'}]]=0$, and similarly $\E[\bar e_{t,j}\xi_{s,j}]=0$. With \eqref{eq:noisevar} this gives the renewal equation
+\begin{equation}\label{eq:renewal}
+a(t)=d(t)+\sum_{s=0}^{t-1}K(t-1-s)\,a(s),\qquad K_{jl}(n)=g_j(n)^2\,\frac{\eta^2}{B}\bigl(h_j^2\mathbf 1_{j=l}+h_jh_l\bigr),
+\end{equation}
+where $a(t)=(a_j(t))_j$ and $d_j(t)=\E\bar e_{t,j}^2\ge0$. The kernel is entrywise nonnegative.
+
+\begin{lemma}\label{lem:gf}
+For $|z|$ small, $\sum_{n\ge0}g_j(n)^2z^n=\dfrac{1+\beta z}{(1-\beta z)\bigl((1+\beta z)^2-k_j^2z\bigr)}$. If $q_j^2<\mu$, then with $z=1/\mu$
+\[
+\sum_{n\ge0}g_j(n)^2\mu^{-(n+1)}=\frac{\mu(\mu+\beta)}{P_j(\mu)}=:\frac1{Q_j(\mu)},\qquad P_j(\mu)=(\mu-\beta)\bigl((\mu+\beta)^2-\mu k_j^2\bigr),
+\]
+and the series converges. In particular, when mode $j$ is stable,
+\[
+G_j:=\sum_{n\ge0}g_j(n)^2=\frac{1+\beta}{(1-\beta)\,\eta h_j\,(2(1+\beta)-\eta h_j)} .
+\]
+\end{lemma}
+
+\begin{proof}
+The products $g_j(n)^2$ are linear combinations of $r_{j,1}^{2n}$, $r_{j,2}^{2n}$ and $(r_{j,1}r_{j,2})^n=\beta^n$ (with polynomial factors at a double root), so their generating function is rational with poles at $1/r_{j,1}^2$, $1/r_{j,2}^2$ and $1/\beta$; the stated formula follows by summing the three geometric series, and is confirmed by comparing Taylor coefficients (Section~\ref{sec:numerics}). Its denominator in the variable $\mu=1/z$ is $\mu^{-3}P_j(\mu)$, and the poles $r_{j,i}^2$, $\beta$ all have modulus at most $q_j^2$, which gives the second formula. At $\mu=1$, $(1+\beta)^2-k_j^2=\eta h_j(2(1+\beta)-\eta h_j)$.
+\end{proof}
+
+The polynomial $P_j$ is the characteristic polynomial $\det(\mu I-T_j)$ of the noiseless $3\times3$ block of \eqref{eq:map}. With noise, the $(1,1)$ entry of the block grows by $\varepsilon_j=\eta^2h_j^2/B$ and the characteristic polynomial becomes $P_j(\mu)-\varepsilon_j\mu(\mu+\beta)$, since the $(1,1)$ cofactor of $\mu I-T_j$ is $\mu(\mu+\beta)$.
+
+Multiplying \eqref{eq:renewal} by $\mu^{-t}$ and summing leads to the weighted kernel
+\begin{equation}\label{eq:khat}
+\widehat K(\mu)=\sum_{n\ge0}K(n)\mu^{-(n+1)}=\operatorname{Diag}\Bigl(\frac{\varepsilon_j}{Q_j(\mu)}\Bigr)+uh^\top,\qquad u_j=\frac{\eta^2h_j}{B\,Q_j(\mu)},
+\end{equation}
+a nonnegative diagonal-plus-rank-one matrix whenever every $q_j^2<\mu$.
+
+\begin{lemma}\label{lem:dr1}
+Let $\Lambda=\operatorname{Diag}(\lambda_j)$ with $\lambda_j\ge0$ and let $u,h$ be nonnegative vectors with $h_ju_j>0$ for all $j$. Then $\rho(\Lambda+uh^\top)<1$ if and only if $\lambda_j<1$ for every $j$ and $\sum_jh_ju_j/(1-\lambda_j)<1$.
+\end{lemma}
+
+\begin{proof}
+If some $\lambda_j\ge1$, the nonnegative matrix dominates $\Lambda$ entrywise and its spectral radius is at least $\lambda_j$. Otherwise $I-\Lambda$ is invertible and $\det(I-\Lambda-uh^\top)=\det(I-\Lambda)\bigl(1-h^\top(I-\Lambda)^{-1}u\bigr)$. The function $\tau\mapsto\rho(\Lambda+\tau uh^\top)$ is continuous and nondecreasing on $[0,1]$ and equals $\max_j\lambda_j<1$ at $\tau=0$; the radius reaches $1$ at the first $\tau$ with $\tau h^\top(I-\Lambda)^{-1}u=1$, by Perron--Frobenius, since then $1$ is an eigenvalue and before then none is. Hence $\rho<1$ at $\tau=1$ exactly when $h^\top(I-\Lambda)^{-1}u<1$.
+\end{proof}
+
+\begin{lemma}\label{lem:weighted}
+Let $\mu\in(0,1]$. Suppose $q_j^2<\mu$ for every $j$ and $\rho(\widehat K(\mu))<1$. Then $\rho(\eta,\beta,B)\le\mu$.
+\end{lemma}
+
+\begin{proof}
+Fix a realisable start and $N\ge1$, and put $A_N=\sum_{t=0}^Na(t)\mu^{-t}$. Multiplying \eqref{eq:renewal} by $\mu^{-t}$ and summing over $t\le N$, the nonnegativity of every term gives, entrywise,
+\[
+A_N\le\sum_{t\ge0}d(t)\mu^{-t}+\widehat K(\mu)A_N .
+\]
+The first sum is finite because $d_j(t)$ is a quadratic form in the noiseless solution, which is $O(t^2q_j^{2t})$. Since $\widehat K(\mu)\ge0$ has spectral radius below one, $\widehat K(\mu)^n\to0$, and iterating the inequality gives $A_N\le(I-\widehat K(\mu))^{-1}\sum_td(t)\mu^{-t}$ uniformly in $N$. Thus $\E\|e_t\|^2\mu^{-t}$ is summable, so $\E\|e_t\|^2=O(\mu^t)$, and Remark~\ref{rem:rate} gives $\rho\le\mu$.
+\end{proof}
+
+\begin{proposition}\label{prop:stability}
+The recursion is mean-square stable, $\rho(\eta,\beta,B)<1$, if and only if $D_j>0$ for every $j$ and
+\[
+S:=\frac\eta B\sum_{j=1}^d\frac{(1+\beta)h_j}{D_j}<1,\qquad D_j=(1-\beta)\bigl(2(1+\beta)-\eta h_j\bigr)-(1+\beta)\frac{\eta h_j}{B}.
+\]
+\end{proposition}
+
+\begin{proof}
+At $\mu=1$ we have $Q_j(1)=1/G_j$, so by Lemma~\ref{lem:dr1} and \eqref{eq:khat}, when every mode is stable, $\rho(\widehat K(1))<1$ holds exactly when $\varepsilon_jG_j<1$ for all $j$ and $\sum_jh_ju_j/(1-\varepsilon_jG_j)<1$. A short computation with Lemma~\ref{lem:gf} shows that $\varepsilon_jG_j<1$ is $D_j>0$ and that
+\[
+\frac{h_ju_j}{1-\varepsilon_jG_j}=\frac{\eta^2h_j^2/B}{1/G_j-\varepsilon_j}=\frac{\eta}{B}\,\frac{(1+\beta)h_j}{D_j},
+\]
+so the sum is $S$.
+
+Suppose $D_j>0$ for all $j$ and $S<1$. Then $\eta h_j<2(1+\beta)$, so every mode is stable. The entries of $\widehat K(\mu)$ are finite and continuous in $\mu$ on $(\max_jq_j^2,\infty)$, so $\rho(\widehat K(\mu))<1$ for some $\mu<1$, and Lemma~\ref{lem:weighted} gives $\rho\le\mu<1$.
+
+Conversely suppose $\rho<1$. By \eqref{eq:jensen} every mode is stable. Start from the deterministic pair $e_0=e_{-1}=(1,\dots,1)$, so that $d_j(0)=1$ and $\sum_td(t)$ has positive entries. Then $A=\sum_ta(t)$ is finite and, summing \eqref{eq:renewal}, $A=\sum_td(t)+\widehat K(1)A$, so $\widehat K(1)A<A$ entrywise with $A>0$. By the Collatz--Wielandt bound $\rho(\widehat K(1))\le\max_j(\widehat K(1)A)_j/A_j<1$, and the first paragraph gives $D_j>0$ and $S<1$.
+\end{proof}
+
+\section{Upper bounds on the spectral gaps}\label{sec:limits}
+
+The first lemma is, with a smaller constant in the second term, Theorem~1 of \cite{MMNK26}; we include a short proof in the present notation.
+
+\begin{lemma}\label{lem:hbupper}
+If $\rho(\eta,\beta,B)<1$, then $1-\rho(\eta,\beta,B)\le\min\bigl(8B\hmin/\tr H,\;4/\sqrt\kappa\bigr)$.
+\end{lemma}
+
+\begin{proof}
+\emph{The conditioning term.} Let $q<1$ be as in \eqref{eq:jensen}. For each $j$, both roots of the real polynomial $\pi_j$ have modulus at most $q$, so $\pi_j(q)\ge0$ and $\pi_j(-q)\ge0$, and $\beta=r_{j,1}r_{j,2}\le q^2<q$. The inequality $\pi_{1}(-q)\ge0$ at $h_1=\hmax$ reads $\eta\hmax\le(1+q)(q+\beta)/q$, and $\pi_{d}(q)\ge0$ at $h_d=\hmin$ reads $\eta\hmin\ge(1-q)(q-\beta)/q$. Dividing, and using that $(q+\beta)/(q-\beta)$ increases in $\beta\le q^2$,
+\[
+\kappa\le\frac{(1+q)(q+\beta)}{(1-q)(q-\beta)}\le\Bigl(\frac{1+q}{1-q}\Bigr)^2,
+\]
+so $q\ge(\sqrt\kappa-1)/(\sqrt\kappa+1)$ and, by \eqref{eq:jensen}, $1-\rho\le1-q^2\le4\sqrt\kappa/(\sqrt\kappa+1)^2<4/\sqrt\kappa$.
+
+\emph{The noise term.} Each $D_j$ is at most $2(1-\beta)(1+\beta)$, so Proposition~\ref{prop:stability} gives $\eta\tr H/(2B(1-\beta))\le S<1$, that is, $\eta<2B(1-\beta)/\tr H$. Put $s=\eta\hmin<2B(1-\beta)\hmin/\tr H$ and consider the mode $h_d=\hmin$. If its roots are complex, then $|r_{d,i}|^2=\beta$ and $s>(1-\sqrt\beta)^2$; hence $1-\rho\le1-\beta\le2(1-\sqrt\beta)<2\sqrt s$, so $(1-\beta)^2<4s<8B(1-\beta)\hmin/\tr H$ and $1-\rho\le1-\beta<8B\hmin/\tr H$. If the roots are real and negative, then $k_d<0$, so $s>1+\beta$, and $8B\hmin/\tr H>4(1+\beta)/(1-\beta)>1\ge1-\rho$. If they are real and nonnegative, $r_{\min}\le\sqrt\beta\le r_{\max}$, so $1-r_{\min}\ge1-\sqrt\beta\ge(1-\beta)/2$ and $1-r_{\max}=s/(1-r_{\min})\le2s/(1-\beta)<4B\hmin/\tr H$; then $1-\rho\le1-r_{\max}^2\le2(1-r_{\max})<8B\hmin/\tr H$.
+\end{proof}
+
+\begin{lemma}\label{lem:sgdupper}
+If $\rho(\eta,0,B)<1$, then $1-\rho(\eta,0,B)\le4\hmin\min(B/\tr H,1/\hmax)$.
+\end{lemma}
+
+\begin{proof}
+At $\beta=0$, $D_j\le2$, so Proposition~\ref{prop:stability} gives $\eta<2B/\tr H$, and stability of the mean gives $\eta\hmax<2$. With $s=\eta\hmin$, \eqref{eq:jensen} gives $\rho\ge(1-s)^2$, so $1-\rho\le2s<4\hmin\min(B/\tr H,1/\hmax)$.
+\end{proof}
+
+\section{Lower bounds on the spectral gaps}\label{sec:tuning}
+
+\begin{lemma}\label{lem:sgdlower}
+Let $\eta_0=\min\bigl(B/(4\tr H),1/(2\hmax)\bigr)$. Then $1-\rho(\eta_0,0,B)\ge\frac34\eta_0\hmin$.
+\end{lemma}
+
+\begin{proof}
+At $\beta=0$ the map \eqref{eq:map} is block triangular: the $a$-coordinates evolve by themselves, through the nonnegative matrix $N_{jl}=\bigl((1-\eta h_j)^2+\eta^2h_j^2/B\bigr)\mathbf 1_{j=l}+\eta^2h_jh_l/B$, and the remaining block is nilpotent. So $\rho$ is the spectral radius of $N$, which is at most its largest column sum,
+\[
+\sum_jN_{jl}=1-\eta h_l\Bigl(2-\eta h_l\bigl(1+\tfrac1B\bigr)-\frac{\eta\tr H}{B}\Bigr).
+\]
+At $\eta=\eta_0$, $\eta_0h_l(1+1/B)\le2\eta_0\hmax\le1$ and $\eta_0\tr H/B\le1/4$, so every column sum is at most $1-\frac34\eta_0\hmin$.
+\end{proof}
+
+\begin{lemma}\label{lem:tuning}
+Let $\delta=\min(1,2/\sqrt\kappa,B\hmin/\tr H)$, $\beta=(1-\delta/2)^2$ and $\eta=\delta^2/(4\hmin)$. Then $\rho(\eta,\beta,B)\le1-\delta/4$.
+\end{lemma}
+
+\begin{proof}
+Put $\mu_0=1-\delta/4$ and $x_j=\eta h_j$. Then $x_j\in[\delta^2/4,\delta^2\kappa/4]\subseteq[\delta^2/4,1]$.
+
+\emph{The noiseless modes.} The roots of $\pi_j$ are complex or double exactly when $(1-\sqrt\beta)^2\le x_j\le(1+\sqrt\beta)^2$. Here $(1-\sqrt\beta)^2=\delta^2/4\le x_j\le1$, so every root has modulus $\sqrt\beta$ and $q_j^2=\beta=1-\delta+\delta^2/4<\mu_0$.
+
+\emph{The noise.} Since $\delta\le B\hmin/\tr H$, we have $\eta\tr H/B=\delta^2\tr H/(4\hmin B)\le\delta/4$, and therefore $\varepsilon_j=x_j\,\eta h_j/B\le x_j\,\eta\tr H/B\le\delta x_j/4$.
+
+\emph{The scalar inequality.} We claim $Q_j(\mu_0)>\delta x_j/2$ for every $j$. Granting it, $Q_j(\mu_0)-\varepsilon_j>\delta x_j/4>0$, so the diagonal entries of $\widehat K(\mu_0)$ are below one, and
+\[
+\sum_j\frac{h_ju_j}{1-\varepsilon_j/Q_j(\mu_0)}=\sum_j\frac{\eta^2h_j^2/B}{Q_j(\mu_0)-\varepsilon_j}<\sum_j\frac{4\eta^2h_j^2}{B\delta x_j}=\frac{4\eta\tr H}{B\delta}\le1 .
+\]
+By Lemma~\ref{lem:dr1}, $\rho(\widehat K(\mu_0))<1$, and Lemma~\ref{lem:weighted} gives $\rho\le\mu_0$.
+
+It remains to prove the claim. As $\mu_0(\mu_0+\beta)>0$, it is equivalent to $F(\delta,x)>0$ for $\delta\in(0,1]$ and $x\in[\delta^2/4,1]$, where, with $k=1+\beta-x$,
+\[
+F(\delta,x)=(\mu_0-\beta)\bigl((\mu_0+\beta)^2-\mu_0k^2\bigr)-\tfrac12\mu_0(\mu_0+\beta)\delta x .
+\]
+Since $\partial_x^2F=-2\mu_0(\mu_0-\beta)<0$ (note $\mu_0-\beta=\delta(3-\delta)/4>0$), $F$ is concave in $x$, and it suffices to check the two endpoints. Direct expansion gives
+\begin{align*}
+F(\delta,\delta^2/4)&=\frac{\delta^3}{128}\bigl(22-26\delta+9\delta^2-\delta^3\bigr),\\
+F(\delta,1)&=\frac{\delta}{256}\bigl(320-496\delta+212\delta^2+20\delta^3-40\delta^4+11\delta^5-\delta^6\bigr).
+\end{align*}
+The cubic $22-26\delta+9\delta^2-\delta^3$ has derivative $-26+18\delta-3\delta^2<0$ on $[0,1]$ and value $4$ at $\delta=1$, so it is positive on $[0,1]$. In the second polynomial, $320-496\delta+212\delta^2$ has negative discriminant and its vertex at $\delta=124/106>1$, so on $[0,1]$ it is at least its value $36$ at $\delta=1$; and $20\delta^3-40\delta^4+11\delta^5-\delta^6\ge\delta^3(20-40\delta-\delta^3)\ge-21$ there. Hence the polynomial is at least $15$ on $[0,1]$, and $F>0$ at both endpoints.
+\end{proof}
+
+\section{Proof of Theorem~\ref{thm:main}}\label{sec:proof}
+
+Since SGD is the case $\beta=0$ of heavy ball, $\rho^*_{\mathrm{HB}}\le\rho^*_{\mathrm{SGD}}$, and the ratio is at least one. Write $y=B\hmax/\tr H$ and note $B\hmin/\tr H=y/\kappa$.
+
+\emph{Upper bound.} By Lemmas~\ref{lem:hbupper} and \ref{lem:sgdlower},
+\[
+\frac{1-\rho^*_{\mathrm{HB}}}{1-\rho^*_{\mathrm{SGD}}}\le\frac{\min(8B\hmin/\tr H,4/\sqrt\kappa)}{\frac34\eta_0\hmin}.
+\]
+If $B\le2\tr H/\hmax$, then $\eta_0=B/(4\tr H)$ and the right side is at most $\frac{8B\hmin/\tr H}{3B\hmin/(16\tr H)}=\frac{128}3\le\frac{128}3m$, since $m\ge1$. If $B\ge2\tr H/\hmax$, then $\eta_0=1/(2\hmax)$, the denominator is $3/(8\kappa)$, and the right side is at most $\min(\frac{64}3y,\frac{32}3\sqrt\kappa)\le\frac{64}3\min(y,\sqrt\kappa)=\frac{64}{3}m$, because $y\ge2$.
+
+\emph{Lower bound.} By Lemmas~\ref{lem:tuning} and \ref{lem:sgdupper},
+\[
+\frac{1-\rho^*_{\mathrm{HB}}}{1-\rho^*_{\mathrm{SGD}}}\ge\frac{\delta/4}{4\hmin\min(B/\tr H,1/\hmax)} .
+\]
+If $y\le1$, then $B\hmin/\tr H=y/\kappa\le\min(1,2/\sqrt\kappa)$, so $\delta=B\hmin/\tr H$ and the ratio is at least $\frac1{16}=\frac{m}{16}$. If $y>1$, the ratio is at least $\delta\kappa/16=\min(\kappa,2\sqrt\kappa,y)/16\ge\min(\sqrt\kappa,y)/16=m/16$. \qed
+
+The intermediate bounds stated in Theorem~\ref{thm:main} are Lemmas~\ref{lem:hbupper}--\ref{lem:tuning}.
+
+\section{Numerical checks}\label{sec:numerics}
+
+The repository listed under Data availability contains a script that builds the matrix $T$ of \eqref{eq:map} directly from the recursion and checks the statements above. Symbolically, it verifies the factorisation of $\det(\mu I-T_j)$ and its $(1,1)$ cofactor, the generating function of Lemma~\ref{lem:gf} to order $12$ in $z$, the concavity of $F$ in $x$, and the two endpoint polynomials together with the absence of roots in $(0,1]$. Numerically, on $2{,}000$ random instances (dimension $2$ to $24$, eigenvalues log-uniform over three and a half decades, $B$ log-uniform in $[1,10^4]$, and random $(\eta,\beta)$ for the first test) it finds
+\begin{itemize}[leftmargin=2em]
+\item over the $930$ mean-square-stable heavy-ball settings, $(1-\rho)/\min(8B\hmin/\tr H,4/\sqrt\kappa)\le0.766$ (Lemma~\ref{lem:hbupper});
+\item $(1-\rho(\eta_0,0,B))/(\frac34\eta_0\hmin)\ge1.64$ (Lemma~\ref{lem:sgdlower});
+\item for the tuning of Lemma~\ref{lem:tuning}, $(1-\rho)/(\delta/4)\ge1.81$;
+\item the resulting ratio, measured against the ceiling of Lemma~\ref{lem:sgdupper}, is at least $0.123\,m$, against the proved $m/16$.
+\end{itemize}
+A second script in the repository minimises $\rho$ over a grid of $(\eta,\beta)$ for power-law spectra $h_j=j^{-\alpha}$, $j\le d$. Table~\ref{tab:powerlaw} lists the optimal speedup divided by $\sqrt\kappa$ against $x=B\hmax/(\sqrt\kappa\tr H)$, the batch measured in units of the critical batch of \cite{MMNK26}. The four curves increase in $x$, lie within about fifteen percent of one another at matched $x$, behave like $0.75x$ for small $x$ and saturate once $x$ exceeds about ten, as Theorem~\ref{thm:main} predicts.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+spectrum $(\alpha,d)$ & $B=10$ & $B=100$ & $B=1000$ & $B=10^5$\\
+\midrule
+$(2,100)$, $\kappa=10^4$ & $0.061$ / $0.047$ & $0.61$ / $0.247$ & $6.1$ / $0.625$ & -- / $0.878$\\
+$(2,50)$, $\kappa=2500$ & $0.123$ / $0.087$ & $1.23$ / $0.358$ & $12.3$ / $0.706$ & -- / $0.893$\\
+$(1.5,100)$, $\kappa=10^3$ & $0.131$ / $0.102$ & $1.31$ / $0.409$ & $13.1$ / $0.730$ & -- / $0.808$\\
+$(1,100)$, $\kappa=100$ & $0.193$ / $0.145$ & $1.93$ / $0.471$ & $19.3$ / $0.707$ & -- / $0.746$\\
+\bottomrule
+\end{tabular}
+\caption{Each entry is $x=B\hmax/(\sqrt\kappa\tr H)$ / $S(B)/\sqrt\kappa$, where $S(B)=(1-\rho^*_{\mathrm{HB}})/(1-\rho^*_{\mathrm{SGD}})$ is computed on an $(\eta,\beta)$ grid.}
+\label{tab:powerlaw}
+\end{table}
+
+\section{Remarks on scope}\label{sec:remarks}
+
+The constants $1/16$ and $128/3$ are not sharp; in the saturated regime the ratio of the optimal speedup to $\sqrt\kappa$ is between $0.75$ and $0.9$ in Table~\ref{tab:powerlaw}. Theorem~\ref{thm:main} concerns the asymptotic rate, the spectral radius of the second-moment map, and not the transient risk on a given spectrum, which governs scaling-law exponents on power-law problems \cite{FEGPP25}. The Gaussian assumption enters only through \eqref{eq:noisevar}: for covariates satisfying only a fourth-moment bound $\E[\|x\|^2xx^\top]\preceq R^2H$ the diagonal second moments do not close, and the renewal argument would need a different comparison. Finally, the comparison is between constant-parameter methods; schedules that vary $\eta$ and $\beta$ with $t$, and the accelerated scheme of \cite{JKKNS18}, are outside its scope.
+
+\section*{Acknowledgements and funding}
+The research presented in this paper was supported by the European Research
+Council (ERC) under the European Union's Horizon Europe research and
+innovation programme (grant agreement No.~101041711), by the Simons
+Foundation as part of the Collaboration on the Mathematical and Scientific
+Foundations of Deep Learning, by Heights Labs, by Convex Nexus Capital, by
+the Israel Science Foundation (grant number 2258/19), and by the Israel
+Science Foundation (ISF Grant 4101/25). Computational resources were
+provided in part by Google Cloud through its education credits program
+(credit 530550103).
+
+\section*{Declaration of competing interest}
+The author holds equity in Heights Labs and in Convex Nexus Capital and
+has a management role at Convex Nexus Capital. These entities are included
+in the funding declaration above.
+
+\section*{Declaration of generative AI and AI-assisted technologies}
+The paper comes out of Math Brain, an ongoing project on the use of AI systems for research mathematics. In October 2026 Claude Opus~5.5 (Anthropic), working in Claude Code, found the proofs of the results in Sections~\ref{sec:renewal}--\ref{sec:proof} and wrote the computations behind Table~\ref{tab:powerlaw}. In November 2026 Claude Opus~5.5 checked the proofs, wrote the verification script and wrote the paper. The author directed the work and is responsible for the content of the paper and for decisions concerning its dissemination.
+
+\section*{Data availability}
+No data were used. The code for the checks of Section~\ref{sec:numerics}, with its output, is available at\\ \url{https://github.com/yspennstate/heavy-ball-batch-speedup}.
+
+\begin{thebibliography}{9}
+
+\bibitem{BCW25}
+R.~Bollapragada, T.~Chen and R.~Ward, On the fast convergence of minibatch heavy ball momentum, \emph{IMA J. Numer. Anal.} (2025); arXiv:2206.07553.
+
+\bibitem{DBV25}
+T.~Dang, R.~Babanezhad and S.~Vaswani, (Accelerated) noise-adaptive stochastic heavy-ball momentum, \emph{Trans. Mach. Learn. Res.} (2025); arXiv:2401.06738.
+
+\bibitem{FEGPP25}
+D.~Ferbach, K.~Everett, G.~Gidel, E.~Paquette and C.~Paquette, Dimension-adapted momentum outscales SGD, arXiv:2505.16098 (2025).
+
+\bibitem{JKKNS18}
+P.~Jain, S.~M.~Kakade, R.~Kidambi, P.~Netrapalli and A.~Sidford, Accelerating stochastic gradient descent for least squares regression, in \emph{Proc. 31st Conference on Learning Theory}, PMLR 75 (2018), 545--604; arXiv:1704.08227.
+
+\bibitem{KNJK18}
+R.~Kidambi, P.~Netrapalli, P.~Jain and S.~M.~Kakade, On the insufficiency of existing momentum schemes for stochastic optimization, in \emph{International Conference on Learning Representations} (2018); arXiv:1803.05591.
+
+\bibitem{LCPP22}
+K.~Lee, A.~N.~Cheng, E.~Paquette and C.~Paquette, Trajectory of mini-batch momentum: batch size saturation and convergence in high dimensions, in \emph{Advances in Neural Information Processing Systems} 35 (2022); arXiv:2206.01029.
+
+\bibitem{MMNK26}
+D.~Morwani, A.~Meterez, P.~A.~Nair and S.~Kakade, Compute efficiency and serial runtime tradeoffs for stochastic momentum methods, arXiv:2606.19179 (2026).
+
+\bibitem{PP21}
+C.~Paquette and E.~Paquette, Dynamics of stochastic momentum methods on large-scale, quadratic models, arXiv:2106.03696 (2021).
+
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,24 @@
+d 100 alpha 1.5: kappa = 1e+03, tr H = 2.413
+  B=     1  SGD rho 0.99900009 (eta 0.507)   HB rho 0.99881628 (eta 0.042, beta 0.9298)   speedup (1-rho_HB)/(1-rho_SGD) = 1.184   sqrt(kappa) bound 31.6
+  B=    10  SGD rho 0.99675016 (eta 1.63)   HB rho 0.98955954 (eta 0.422, beta 0.9162)   speedup (1-rho_HB)/(1-rho_SGD) = 3.213   sqrt(kappa) bound 31.6
+  B=   100  SGD rho 0.99616440 (eta 1.92)   HB rho 0.95038816 (eta 1.53, beta 0.9162)   speedup (1-rho_HB)/(1-rho_SGD) = 12.935   sqrt(kappa) bound 31.6
+  B=  1000  SGD rho 0.99608498 (eta 1.96)   HB rho 0.90973053 (eta 2.64, beta 0.9000)   speedup (1-rho_HB)/(1-rho_SGD) = 23.057   sqrt(kappa) bound 31.6
+  B=100000  SGD rho 0.99608498 (eta 1.96)   HB rho 0.89999400 (eta 3.68, beta 0.8806)   speedup (1-rho_HB)/(1-rho_SGD) = 25.544   sqrt(kappa) bound 31.6
+d 100 alpha 2.0: kappa = 1e+04, tr H = 1.635
+  B=     1  SGD rho 0.99988045 (eta 0.609)   HB rho 0.99983717 (eta 0.0197, beta 0.9758)   speedup (1-rho_HB)/(1-rho_SGD) = 1.362   sqrt(kappa) bound 100.0
+  B=    10  SGD rho 0.99967416 (eta 1.63)   HB rho 0.99847389 (eta 0.18, beta 0.9758)   speedup (1-rho_HB)/(1-rho_SGD) = 4.684   sqrt(kappa) bound 100.0
+  B=   100  SGD rho 0.99960816 (eta 1.96)   HB rho 0.99030938 (eta 0.959, beta 0.9758)   speedup (1-rho_HB)/(1-rho_SGD) = 24.731   sqrt(kappa) bound 100.0
+  B=  1000  SGD rho 0.99960815 (eta 1.96)   HB rho 0.97549136 (eta 2.79, beta 0.9654)   speedup (1-rho_HB)/(1-rho_SGD) = 62.546   sqrt(kappa) bound 100.0
+  B=100000  SGD rho 0.99960815 (eta 1.96)   HB rho 0.96558780 (eta 3.04, beta 0.9654)   speedup (1-rho_HB)/(1-rho_SGD) = 87.820   sqrt(kappa) bound 100.0
+d 50 alpha 2.0: kappa = 2.5e+03, tr H = 1.625
+  B=     1  SGD rho 0.99952396 (eta 0.597)   HB rho 0.99936238 (eta 0.0277, beta 0.9654)   speedup (1-rho_HB)/(1-rho_SGD) = 1.339   sqrt(kappa) bound 50.0
+  B=    10  SGD rho 0.99869722 (eta 1.63)   HB rho 0.99435196 (eta 0.332, beta 0.9508)   speedup (1-rho_HB)/(1-rho_SGD) = 4.335   sqrt(kappa) bound 50.0
+  B=   100  SGD rho 0.99843337 (eta 1.96)   HB rho 0.97192729 (eta 1.61, beta 0.9412)   speedup (1-rho_HB)/(1-rho_SGD) = 17.919   sqrt(kappa) bound 50.0
+  B=  1000  SGD rho 0.99843307 (eta 1.96)   HB rho 0.94465648 (eta 3.05, beta 0.9298)   speedup (1-rho_HB)/(1-rho_SGD) = 35.320   sqrt(kappa) bound 50.0
+  B=100000  SGD rho 0.99843307 (eta 1.96)   HB rho 0.93003545 (eta 3.25, beta 0.9298)   speedup (1-rho_HB)/(1-rho_SGD) = 44.651   sqrt(kappa) bound 50.0
+d 100 alpha 1.0: kappa = 100, tr H = 5.187
+  B=     1  SGD rho 0.99554803 (eta 0.252)   HB rho 0.99543980 (eta 0.0746, beta 0.7106)   speedup (1-rho_HB)/(1-rho_SGD) = 1.024   sqrt(kappa) bound 10.0
+  B=    10  SGD rho 0.97216870 (eta 1.44)   HB rho 0.95979532 (eta 0.625, beta 0.7106)   speedup (1-rho_HB)/(1-rho_SGD) = 1.445   sqrt(kappa) bound 10.0
+  B=   100  SGD rho 0.96198693 (eta 1.92)   HB rho 0.82098864 (eta 2.14, beta 0.7106)   speedup (1-rho_HB)/(1-rho_SGD) = 4.709   sqrt(kappa) bound 10.0
+  B=  1000  SGD rho 0.96119611 (eta 1.96)   HB rho 0.72578027 (eta 2.54, beta 0.7106)   speedup (1-rho_HB)/(1-rho_SGD) = 7.067   sqrt(kappa) bound 10.0
+  B=100000  SGD rho 0.96119530 (eta 1.96)   HB rho 0.71072521 (eta 2.54, beta 0.7106)   speedup (1-rho_HB)/(1-rho_SGD) = 7.455   sqrt(kappa) bound 10.0

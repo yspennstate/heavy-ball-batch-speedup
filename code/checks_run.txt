@@ -1,0 +1,7 @@
+1. determinant factorisation, cofactor and squared-impulse generating function: OK
+2. G at x = delta^2/4: -delta**3*(delta**3 - 9*delta**2 + 26*delta - 22)/128; no root in (0, 1], positive at 1/2
+2. G at x = 1: -delta*(delta**6 - 11*delta**5 + 40*delta**4 - 20*delta**3 - 212*delta**2 + 496*delta - 320)/256; no root in (0, 1], positive at 1/2
+3a. Lemma 3 over 930 stable heavy-ball points: max (1 - rho)/bound = 0.7662  (<= 1)
+3b. Lemma 4 over 2000 SGD points: min (1 - rho)/((3/4) eta0 h_min) = 1.6387  (>= 1)
+3c. Lemma 5 over 2000 points: min (1 - rho)/(delta/4) = 1.8117  (>= 1)
+3d. speedup / min(max(1, B h_max/tr H), sqrt kappa) >= 0.1234  (theorem: 1/16 = 0.0625)
