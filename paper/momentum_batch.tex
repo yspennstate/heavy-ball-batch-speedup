@@ -44,7 +44,7 @@ Momentum therefore gains at most a constant factor while $B\lesssim\tr H/\hmax$,
 
 \section{Introduction}\label{sec:intro}
 
-Whether momentum accelerates stochastic gradient descent has a well-known negative answer in the small-batch regime. Kidambi, Netrapalli, Jain and Kakade \cite{KNJK18} exhibited simple least-squares instances on which stochastic heavy ball and Nesterov's method cannot outperform SGD at any setting of their parameters, and attributed their practical gains to mini-batching; Jain, Kakade, Kidambi, Netrapalli and Sidford \cite{JKKNS18} gave a different accelerated scheme that does improve on SGD. In the proportional high-dimensional limit, Paquette and Paquette \cite{PP21} showed that small-batch momentum gives no acceleration, and Lee, Cheng, Paquette and Paquette \cite{LCPP22} showed that once the batch exceeds an implicit conditioning ratio heavy ball converges at the accelerated rate $O(1/\sqrt\kappa)$. Bollapragada, Chen and Ward \cite{BCW25} proved accelerated linear convergence of mini-batch heavy ball once the batch is large enough, and Dang, Babanezhad and Vaswani \cite{DBV25} showed that a $\kappa$-dependent batch threshold is necessary.
+The heavy-ball method is due to Polyak \cite{Pol64}, who showed that on quadratics it improves the contraction factor of gradient descent from $1-O(1/\kappa)$ to $1-O(1/\sqrt\kappa)$. Whether momentum accelerates stochastic gradient descent has a well-known negative answer in the small-batch regime. Loizou and Richt\'arik \cite{LR20} proved linear convergence of stochastic heavy ball for consistent linear systems, with an accelerated rate for the expected iterate but not for the expected squared error. Kidambi, Netrapalli, Jain and Kakade \cite{KNJK18} exhibited simple least-squares instances on which stochastic heavy ball and Nesterov's method cannot outperform SGD at any setting of their parameters, and attributed their practical gains to mini-batching; Jain, Kakade, Kidambi, Netrapalli and Sidford \cite{JKKNS18} gave a different accelerated scheme that does improve on SGD. In the proportional high-dimensional limit, Paquette and Paquette \cite{PP21} showed that small-batch momentum gives no acceleration, and Lee, Cheng, Paquette and Paquette \cite{LCPP22} showed that once the batch exceeds an implicit conditioning ratio heavy ball converges at the accelerated rate $O(1/\sqrt\kappa)$. Bollapragada, Chen and Ward \cite{BCW25} proved accelerated linear convergence of mini-batch heavy ball once the batch is large enough, and Dang, Babanezhad and Vaswani \cite{DBV25} showed that a $\kappa$-dependent batch threshold is necessary.
 
 Recently Morwani, Meterez, Nair and Kakade \cite{MMNK26} studied the same streaming model as the present paper and proved that the best spectral radius $s^*(H,B)$ of the heavy-ball second-moment operator satisfies $s^*(H,B)\ge 1-8\min\{B\hmin/\tr H,\sqrt{\hmin/\hmax}\}$. This identifies the critical batch $B^{\mathrm{crit}}_{\mathrm{HB}}=\sqrt\kappa\,\tr H/\hmax$, beyond which acceleration is possible in principle. They left the matching upper bound, that is, parameters attaining such a rate, to future work.
 
@@ -66,7 +66,7 @@ Let $m=\min\bigl(\max(1,B\hmax/\tr H),\sqrt\kappa\bigr)$. Then
 More precisely, $1-\rho_{\mathrm{HB}}^*$ lies between $\frac14\min(1,2/\sqrt\kappa,B\hmin/\tr H)$ and $\min(8B\hmin/\tr H,4/\sqrt\kappa)$, and $1-\rho_{\mathrm{SGD}}^*$ lies between $\frac34\hmin\min(B/(4\tr H),1/(2\hmax))$ and $4\hmin\min(B/\tr H,1/\hmax)$.
 \end{theorem}
 
-The three regimes are visible in the formula. For $B\le\tr H/\hmax$ the speedup is bounded by an absolute constant, which is the instance-level form of the phenomenon of \cite{KNJK18}: in that range the noise, not the conditioning, limits both methods. Between $\tr H/\hmax$ and $\sqrt\kappa\,\tr H/\hmax$ the speedup grows linearly in $B$, and beyond the critical batch of \cite{MMNK26} it saturates at order $\sqrt\kappa$, the deterministic acceleration of Polyak's method.
+The three regimes are visible in the formula. The threshold $\tr H/\hmax$ is the critical batch of SGD identified by Ma, Bassily and Belkin \cite{MBB18}, below which SGD gains linearly from larger batches and above which it does not. For $B\le\tr H/\hmax$ the speedup is bounded by an absolute constant, which is the instance-level form of the phenomenon of \cite{KNJK18}: in that range the noise, not the conditioning, limits both methods. Between $\tr H/\hmax$ and $\sqrt\kappa\,\tr H/\hmax$ the speedup grows linearly in $B$, and beyond the critical batch of \cite{MMNK26} it saturates at order $\sqrt\kappa$, the deterministic acceleration of Polyak's method \cite{Pol64}.
 
 The lower bound on $1-\rho^*_{\mathrm{HB}}$ comes from one explicit choice (Lemma~\ref{lem:tuning}):
 \[
@@ -350,7 +350,7 @@ The paper is part of the Math Brain project, whose public repository is \url{htt
 \begin{thebibliography}{9}
 
 \bibitem{BCW25}
-R.~Bollapragada, T.~Chen and R.~Ward, On the fast convergence of minibatch heavy ball momentum, \emph{IMA J. Numer. Anal.} (2025); arXiv:2206.07553.
+R.~Bollapragada, T.~Chen and R.~Ward, On the fast convergence of minibatch heavy ball momentum, \emph{IMA J. Numer. Anal.} \textbf{45} (2025), 1397--1424; arXiv:2206.07553.
 
 \bibitem{DBV25}
 T.~Dang, R.~Babanezhad and S.~Vaswani, (Accelerated) noise-adaptive stochastic heavy-ball momentum, \emph{Trans. Mach. Learn. Res.} (2025); arXiv:2401.06738.
@@ -367,12 +367,18 @@ R.~Kidambi, P.~Netrapalli, P.~Jain and S.~M.~Kakade, On the insufficiency of exi
 \bibitem{LCPP22}
 K.~Lee, A.~N.~Cheng, E.~Paquette and C.~Paquette, Trajectory of mini-batch momentum: batch size saturation and convergence in high dimensions, in \emph{Advances in Neural Information Processing Systems} 35 (2022); arXiv:2206.01029.
 
+\bibitem{LR20}
+N.~Loizou and P.~Richt\'arik, Momentum and stochastic momentum for stochastic gradient, Newton, proximal point and subspace descent methods, \emph{Comput. Optim. Appl.} \textbf{77} (2020), 653--710; arXiv:1712.09677.
+\bibitem{MBB18}
+S.~Ma, R.~Bassily and M.~Belkin, The power of interpolation: understanding the effectiveness of SGD in modern over-parametrized learning, in \emph{Proceedings of the 35th International Conference on Machine Learning}, PMLR 80 (2018), 3325--3334; arXiv:1712.06559.
 \bibitem{MMNK26}
 D.~Morwani, A.~Meterez, P.~A.~Nair and S.~Kakade, Compute efficiency and serial runtime tradeoffs for stochastic momentum methods, arXiv:2606.19179 (2026).
 
 \bibitem{PP21}
 C.~Paquette and E.~Paquette, Dynamics of stochastic momentum methods on large-scale, quadratic models, arXiv:2106.03696 (2021).
 
+\bibitem{Pol64}
+B.~T.~Polyak, Some methods of speeding up the convergence of iteration methods, \emph{USSR Comput. Math. Math. Phys.} \textbf{4} (1964), no.~5, 1--17.
 \bibitem{MathBrainRepo} Y.~Shmalo, \emph{Math Brain: public snapshot, code and tests}, 2026, \url{https://github.com/yspennstate/math-brain-public}.
 
 \bibitem{MathBrainPaper} Y.~Shmalo, \emph{Math Brain: shared, auditable memory for multi-agent mathematical research}, October 2026, \url{https://github.com/yspennstate/math-brain-public/tree/main/papers/math-brain-2026-10-24}.
